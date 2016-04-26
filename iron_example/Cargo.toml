@@ -1,7 +1,0 @@
-[package]
-name = "iron_example"
-version = "0.1.0"
-authors = ["preston <taopopoo@126.com>"]
-
-[dependencies]
-nickel="0.8.0"

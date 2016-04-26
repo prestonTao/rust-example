@@ -1,0 +1,8 @@
+[package]
+name = "rust-example"
+version = "0.1.0"
+authors = ["prestonTao <taopopoo@126.com>"]
+
+[dependencies]
+rand = "0.3.0"
+time = "0.1.0"
