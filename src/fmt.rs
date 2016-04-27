@@ -2,7 +2,7 @@
 
 //http://www.cnblogs.com/chenxizhang/p/4762975.html
 pub fn run(){
-    print();
+    // print();
 }
 
 fn example(){
