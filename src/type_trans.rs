@@ -15,3 +15,10 @@ fn Trans(){
 	let y = x.to_string();
 
 }
+
+pub fn convert(pack_data: &[u8]){  
+    let ptr :*const u8 = pack_data.as_ptr();  
+    let ptr :*const u32 = ptr as *const u32;  
+    let s = unsafe{ *ptr};  
+    println!("{:?}", s);  
+} 

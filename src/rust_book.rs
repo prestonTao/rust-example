@@ -169,5 +169,164 @@ fn Loop(){
 
 //移动语义
 fn MoveSemantics(){
-	
+	let v1 = vec![1, 2, 3];
+	let v2 = vec![1, 2, 3];
+	let (v1, v2, answer) = MoveSemantics_foo(v1, v2);
+	let answer = MoveSemantics_foo_too(v1, v2);
+}
+
+//在方法的返回交还所有权
+fn MoveSemantics_foo(v1: Vec<i32>, v2: Vec<i32>) -> (Vec<i32>, Vec<i32>, i32) {
+	// do stuff with v1 and v2
+	// hand back ownership, and the result of our function
+	(v1, v2, 42)
+}
+//使用借用
+fn MoveSemantics_foo_too(v1: Vec<i32>, v2: Vec<i32>) -> i32 {
+	// v1.push(5);
+	42
+}
+
+//借用
+fn JieYong(){
+	let mut x = 5;
+	let mut xs = vec![1, 2, 3];
+	{
+		let y = &mut x; // -+ &mut borrow starts here
+		*y += 1; // |
+
+		let ys = &mut xs;
+		ys.push(4);
+	} // -+ ... and ends here
+	println!("{}", x); // <- try to borrow x here
+}
+
+
+//迭代器失效
+fn IteratorInvalidation(){
+	let mut v = vec![1, 2, 3];
+	for i in &v {
+		println!("{}", i);
+	}
+}
+
+
+//生命周期
+fn LifeTime(){
+	let y = &5; // this is the same as `let _y = 5; let y = &_y;`
+	let f = Foo { x: y };
+	println!("x: {}, x: {}", f.x, f.x());
+
+	let x: &'static str = "Hello, world.";
+	let x: &'static i32 = &FOO;
+}
+
+// implicit
+fn LifeTime_foo(x: &i32) {
+}
+// explicit
+fn LifeTime_bar<'a, 'b>(x: &'a i32, y: &'b i32) {
+}
+
+struct Foo<'a> {
+	x: &'a i32,
+}
+
+impl<'a> Foo<'a> {
+	fn x(&self) -> &'a i32 { self.x }
+}
+
+static FOO: i32 = 5;
+
+
+
+//生命周期省略（Lifetime Elision）
+
+// fn print(s: &str); // elided
+// fn print<'a>(s: &'a str); // expanded
+// fn debug(lvl: u32, s: &str); // elided
+// fn debug<'a>(lvl: u32, s: &'a str); // expanded
+// // In the preceding example, `lvl` doesn’t need a lifetime because it’s not a
+// // reference (`&`). Only things relating to references (such as a `struct`
+// // which contains a reference) need lifetimes.
+// fn substr(s: &str, until: u32) -> &str; // elided
+// fn substr<'a>(s: &'a str, until: u32) -> &'a str; // expanded
+// fn get_str() -> &str; // ILLEGAL, no inputs
+// fn frob(s: &str, t: &str) -> &str; // ILLEGAL, two inputs
+// fn frob<'a, 'b>(s: &'a str, t: &'b str) -> &str; // Expanded: Output lifetime is ambigu
+// ous
+// fn get_mut(&mut self) -> &mut T; // elided
+// fn get_mut<'a>(&'a mut self) -> &'a mut T; // expanded
+// fn args<T:ToCStr>(&mut self, args: &[T]) -> &mut Command; // elided
+// fn args<'a, 'b, T:ToCStr>(&'a mut self, args: &'b [T]) -> &'a mut Command; // expanded
+// fn new(buf: &mut [u8]) -> BufWriter; // elided
+// fn new<'a>(buf: &'a mut [u8]) -> BufWriter<'a>; // expanded
+
+
+
+//可变性
+use std::sync::Arc;
+use std::cell::Cell;
+
+fn KeBianXin(){
+	let mut x = 5;
+	let mut y = &mut x;
+
+	let (mut x, y) = (5, 6);
+
+	let xarc = Arc::new(5);
+	let yarc = xarc.clone();
+
+	//结构体可变性
+	let mut a = Point { x: 5, y: 6 };
+	a.x = 10;
+
+	//模拟字段级别的可变性
+	let point = PointToo { x: 5, y: Cell::new(6) };
+	point.y.set(7);
+	println!("y: {:?}", point.y);
+}
+
+struct Point{
+	x: i32,
+	y: i32,
+}
+
+struct PointToo {
+	x: i32,
+	y: Cell<i32>,
+}
+
+
+//结构体
+fn Struct(){
+	let mut point = Point { x: 0, y: 0 };
+	{
+		let r = PointRef { x: &mut point.x, y: &mut point.y };
+		*r.x = 5;
+		*r.y = 6;
+	}
+	assert_eq!(5, point.x);
+	assert_eq!(6, point.y);
+}
+//带可变指针的结构体
+struct PointRef<'a> {
+	x: &'a mut i32,
+	y: &'a mut i32,
+}
+
+
+//更新语法（Update syntax）
+//一个包含 .. 的 struct 表明你想要使用一些其它结构体的拷贝的一些值
+fn UpdateSyntax(){
+	let mut point = Point3d { x: 0, y: 0, z: 0 };
+	point = Point3d { y: 1, .. point };
+
+	let origin = Point3d { x: 0, y: 0, z: 0 };
+	point = Point3d { z: 1, x: 2, .. origin };
+}
+struct Point3d {
+	x: i32,
+	y: i32,
+	z: i32,
 }
