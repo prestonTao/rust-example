@@ -8,6 +8,8 @@ fn main() {
 	time_example::run();
 	rust_example::fmt::run();
 	rust_example::concurrency::run();
+	rust_example::mongodb::run();
+	rust_example::collections::run();
 }
 
 

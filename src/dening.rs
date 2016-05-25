@@ -19,6 +19,10 @@ impl Philosopher {
 }
 
 fn run() {
+
+}
+
+fn example(){
 	//let p1 = Philosopher::new("Baruch Spinoza");      // 译者注：朱迪斯·巴特勒
 	//let p2 = Philosopher::new("Gilles Deleuze");      // 译者注：吉尔·德勒兹
 	//let p3 = Philosopher::new("Karl Marx");           // 译者注：卡尔·马克思
