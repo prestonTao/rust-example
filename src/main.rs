@@ -10,6 +10,7 @@ fn main() {
 	rust_example::concurrency::run();
 	rust_example::mongodb::run();
 	rust_example::collections::run();
+	rust_example::file::run();
 }
 
 
