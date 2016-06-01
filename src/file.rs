@@ -4,7 +4,7 @@ use std::fs::File;
 
 pub fn run(){
 	// readContent();
-	readFileBytes();
+	// readFileBytes();
 }
 
 //读文件内容
