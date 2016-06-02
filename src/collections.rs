@@ -4,7 +4,8 @@ use std::collections::HashSet;
 
 
 pub fn run(){
-	example_hashmap();
+	// example_hashmap();
+	example_hashset();
 }
 
 fn example_hashmap(){
@@ -76,6 +77,27 @@ fn example_hashset(){
 	for x in &vikings {
 	    println!("{:?}", x);
 	}
+
+	println!("test take() function");
+
+	let mut s: HashSet<&str> = HashSet::new();
+	s.insert("tao");
+	s.insert("hong");
+	s.insert("fei");
+	for (index, one) in s.drain().by_ref().take(2).enumerate(){
+		println!("{} {}", index, one);
+	}
+
+	// match s.get("tao"){
+	// 	Some(x) => {
+	// 		println!("{}", x);
+	// 	},
+	// 	None => {
+	// 		println!("None");
+	// 	},
+	// }
+	
+
 }
 
 #[derive(Hash, Eq, PartialEq, Debug)]
