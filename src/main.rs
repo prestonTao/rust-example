@@ -11,6 +11,9 @@ fn main() {
 	rust_example::mongodb::run();
 	rust_example::collections::run();
 	rust_example::file::run();
+	rust_example::net::run();
+
+    rust_example::test::run();
 }
 
 

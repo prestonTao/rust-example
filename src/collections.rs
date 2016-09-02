@@ -84,7 +84,7 @@ fn example_hashset(){
 	s.insert("tao");
 	s.insert("hong");
 	s.insert("fei");
-	for (index, one) in s.drain().by_ref().take(2).enumerate(){
+	for (index, one) in s.drain().by_ref().enumerate(){
 		println!("{} {}", index, one);
 	}
 

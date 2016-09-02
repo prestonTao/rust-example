@@ -25,12 +25,15 @@
 extern crate time;
 use std::mem;
 use std::fmt;
+use std::time as t;
 // use std::thread;
 // use time::*;
 
 
 pub fn run(){
 	// example();
+    println!("start time_example----------");
+    getSystemTimeNow();
 }
 
 fn example(){
@@ -70,4 +73,7 @@ pub fn format(){
 }
 
 
-// pub fn 
+pub fn getSystemTimeNow(){
+    let e = t::SystemTime::now();
+    println!("{:?}", e);
+}
