@@ -1,28 +1,76 @@
 
 use std::thread;
+use std::sync::Arc;
+use std::cell::RefCell;
+
 fn main(){
-	example2();
-	// thread::sleep_ms(1000*10);
+	example3();
+	thread::sleep_ms(1000*10);
+	// let mut a = Arc::new(vec![0]);
+	// Arc::make_mut(&mut a).push(2);
+	// println!("{:?}", a);
 }
 
+
+
+fn example3(){
+	// let node = Node{name:"nihao".to_string()};
+	let block = Box::new([0u8; 1024*1024*100]);
+
+	let mut ptr = TwoPtru8{
+		big: RefCell::new(Vec::new()),
+		xiao: RefCell::new(Vec::new()),
+	};
+
+	thread::sleep_ms(1000*10);
+	ptr.put(block);
+
+
+}
+
+struct TwoPtru8{
+	big: RefCell<Vec<Arc<Box<[u8; 1024*1024*100]>>>>,
+	xiao: RefCell<Vec<Arc<Box<[u8; 1024*1024*100]>>>>,
+}
+impl TwoPtru8{
+	fn put(&mut self, block: Box<[u8; 1024*1024*100]>){
+		// let boxNode = Box::new(node);
+		// let rcNode = Arc::new(node);
+		// self.xiao.push(Arc::make_mut(rcNode.clone()));
+		let arcBlock = Arc::new(block);
+
+		self.big.borrow_mut().push(arcBlock.clone());
+		self.xiao.borrow_mut().push(arcBlock.clone());
+	}
+}
+
+
+//------------------------------------------
 fn example2(){
 	let node = Node{name:"nihao".to_string()};
 	let mut ptr = TwoPtr{
-		big: Vec::new(),
-		xiao: Vec::new(),
+		big: RefCell::new(Vec::new()),
+		xiao: RefCell::new(Vec::new()),
 	};
-	ptr.put(&node);
+
+	thread::sleep_ms(1000*10);
+	ptr.put(node);
+
 
 }
 
-struct TwoPtr<'a>{
-	big: Vec<Node>,
-	xiao: Vec<&'a Node>,
+struct TwoPtr{
+	big: RefCell<Vec<Arc<Node>>>,
+	xiao: RefCell<Vec<Arc<Node>>>,
 }
-impl<'a> TwoPtr<'a>{
-	fn put(&mut self, node: &Node){
-		self.xiao.push(node);
-		self.big.push(*node);
+impl TwoPtr{
+	fn put(&mut self, node: Node){
+		// let boxNode = Box::new(node);
+		let rcNode = Arc::new(node);
+		// self.xiao.push(Arc::make_mut(rcNode.clone()));
+
+		self.big.borrow_mut().push(rcNode.clone());
+		self.xiao.borrow_mut().push(rcNode.clone());
 	}
 }
 struct Node{
