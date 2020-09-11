@@ -10,5 +10,6 @@ pub mod map;
 pub mod mongodb;
 pub mod net;
 pub mod libother;
+pub mod smart_pointer;
 
 pub mod test;

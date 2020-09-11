@@ -5,12 +5,17 @@
 // use rust_example::time_example;
 pub mod time_example;
 pub mod libother;
+pub mod smart_pointer;
 
 use tokio::net::TcpListener;
 use tokio::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+
+	smart_pointer::run();
+
+
 	time_example::run();
 	rust_example::fmt::run();
 	rust_example::concurrency::run();
