@@ -8,8 +8,8 @@ edition = "2018"
 rand = "0.3.0"
 time = "0.1.0"
 hyper = "*"
-futures = "*"
-tokio = { version = "*", features = ["full"] }
+futures = "0.3.5"
+tokio = { version = "0.2", features = ["full"] }
 
 # bson = "0.2.0"
 # mongodb = "0.1.4"
