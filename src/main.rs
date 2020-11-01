@@ -29,7 +29,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	// libother::tokio::tokioasync2::run().await;
 	// libother::tokio::tokiotcpserver::run();
 	// rust_example::select::run().await;
-	rust_example::time_example::run();
+	// rust_example::time_example::run();
+	libother::once_cell::once_cell_example::run();
 
 	//这个方法有异步监听命令行输入，留在最后
 	// libother::tokio::tokioasync::run().await;
