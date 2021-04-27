@@ -12,5 +12,6 @@ pub mod net;
 pub mod libother;
 pub mod smart_pointer;
 pub mod select;
+pub mod thread_safe;
 
 pub mod test;

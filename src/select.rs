@@ -1,39 +1,38 @@
 
-// [dependencies]
-// futures = "0.3.5"
-// tokio = { version = "0.2", features = ["full"] }
+use std::thread;
+use std::time::Duration;
+use crossbeam_channel::{select, unbounded};
 
-use futures::{select, future::FutureExt, pin_mut};
-use tokio::{runtime::Runtime, task};
-use std::io::Result;
-
-async fn function1() -> Result<()> {
-    tokio::time::delay_for(tokio::time::Duration::from_secs(10)).await;
-    println!("function1 ++++ ");
-    Ok(())
-}
-
-async fn function2() -> Result<()> {
-    println!("function2 ++++ ");
-    Ok(())
-}
-
-async fn async_main() {
-    let f1 = function1().fuse();
-    let f2 = function2().fuse();
-
-    pin_mut!(f1, f2);
-
-    select! {
-        _ = f1 => println!("task one completed first"),
-        _ = f2 => println!("task two completed first"),
+pub async fn run() {
+    for i in 0..100 {    
+        example();
     }
 }
 
-pub async fn run() {
-    task::spawn(async_main());
+fn example(){
+    let (s1, r1) = unbounded();
+    let (s2, r2) = unbounded();
 
-    // let mut runtime = Runtime::new().unwrap();
-    // runtime.block_on(async_main());
-    println!("Hello, world!");
+    thread::spawn(move || {
+        thread::sleep(Duration::from_micros(10));
+        s1.send(10).unwrap();
+    });
+    thread::spawn(move || {
+        s2.send(20).unwrap();
+    });
+
+    //最多执行这两个接收操作中的一个。
+    select! {
+        recv(r1) -> msg => {
+            println!("10");
+            assert_eq!(msg, Ok(10))
+        },
+        recv(r2) -> msg => {
+            println!("20");
+            assert_eq!(msg, Ok(20))
+        },
+        default(Duration::from_secs(1)) => println!("timed out"),
+    }
 }
+
+

@@ -6,6 +6,7 @@
 pub mod time_example;
 pub mod libother;
 pub mod smart_pointer;
+pub mod thread_safe;
 
 use tokio::net::TcpListener;
 use tokio::prelude::*;
@@ -30,7 +31,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	// libother::tokio::tokiotcpserver::run();
 	// rust_example::select::run().await;
 	// rust_example::time_example::run();
-	libother::once_cell::once_cell_example::run();
+
+
+	// libother::once_cell::once_cell_example::run();
+
+	// libother::async_std::simple1::run();
+	// libother::pnet::simple::run();
+	thread_safe::s3::run().await;
 
 	//这个方法有异步监听命令行输入，留在最后
 	// libother::tokio::tokioasync::run().await;
