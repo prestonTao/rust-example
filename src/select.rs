@@ -1,39 +1,78 @@
 
-// [dependencies]
-// futures = "0.3.5"
-// tokio = { version = "0.2", features = ["full"] }
+use std::thread;
+use std::time::Duration;
+use crossbeam_channel::{select, unbounded};
+use rand::Rng;
+use async_io::Timer;
+extern crate rand;
 
-use futures::{select, future::FutureExt, pin_mut};
-use tokio::{runtime::Runtime, task};
-use std::io::Result;
-
-async fn function1() -> Result<()> {
-    tokio::time::delay_for(tokio::time::Duration::from_secs(10)).await;
-    println!("function1 ++++ ");
-    Ok(())
+pub async fn run() {
+    for i in 0..100 {    
+        example();
+    }
+    example2();
 }
 
-async fn function2() -> Result<()> {
-    println!("function2 ++++ ");
-    Ok(())
-}
+fn example(){
+    let (s1, r1) = unbounded();
+    let (s2, r2) = unbounded();
 
-async fn async_main() {
-    let f1 = function1().fuse();
-    let f2 = function2().fuse();
+    smol::spawn(async move {
+		let secret_number = rand::thread_rng().gen_range(1, 101);
+		Timer::after(Duration::from_micros(secret_number)).await;
+        // thread::sleep(Duration::from_micros(secret_number));
+        s1.send(10).unwrap();
+	}).detach();
 
-    pin_mut!(f1, f2);
+	smol::spawn(async move {
+		let secret_number = rand::thread_rng().gen_range(1, 101);
+		Timer::after(Duration::from_micros(secret_number)).await;
+        // thread::sleep(Duration::from_micros(secret_number));
+        s2.send(20).unwrap();
+	}).detach();
 
+
+    // thread::spawn(move || {
+    //     let secret_number = rand::thread_rng().gen_range(1, 101);
+    //     thread::sleep(Duration::from_micros(secret_number));
+    //     s1.send(10).unwrap();
+    // });
+    // thread::spawn(move || {
+    //     let secret_number = rand::thread_rng().gen_range(1, 101);
+    //     thread::sleep(Duration::from_micros(secret_number));
+    //     s2.send(20).unwrap();
+    // });
+
+    //最多执行这两个接收操作中的一个。
     select! {
-        _ = f1 => println!("task one completed first"),
-        _ = f2 => println!("task two completed first"),
+        recv(r1) -> msg => {
+            println!("10");
+            assert_eq!(msg, Ok(10))
+        },
+        recv(r2) -> msg => {
+            println!("20");
+            assert_eq!(msg, Ok(20))
+        },
+        default(Duration::from_secs(1)) => println!("timed out"),
     }
 }
 
-pub async fn run() {
-    task::spawn(async_main());
 
-    // let mut runtime = Runtime::new().unwrap();
-    // runtime.block_on(async_main());
-    println!("Hello, world!");
+fn example2(){
+    let (s1, r1) = unbounded();
+    s1.send(());
+    select! {
+        recv(r1) -> msg => {
+            println!("1111111111111");
+            // assert_eq!(msg, Ok(10))
+        },
+        // recv(r2) -> msg => {
+        //     println!("20");
+        //     assert_eq!(msg, Ok(20))
+        // },
+        default(Duration::from_secs(1)) => println!("timed out"),
+    }
+    println!("finish");
 }
+
+
