@@ -93,7 +93,8 @@
 use async_channel::{unbounded, Receiver, Sender};
 // use crossbeam_channel::{Receiver, Sender, bounded, select, unbounded};
 use async_io::Timer;
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
+use async_dup::{Arc, Mutex};
 use std::thread;
 use futures::future;
 use smol;
@@ -138,7 +139,7 @@ async fn example(){
 
 
     // worker执行计数
-    let mut counter = 0;
+    let mut counter: i32 = 0;
 
     loop{
         match result_receiver.recv().await {
@@ -160,15 +161,15 @@ async fn example(){
 
 async fn DistributeTasks(work_sender: Sender<WorkMsg>){
     work_sender.send(WorkMsg::Work(1)).await;
-    Timer::after(Duration::from_secs(1)).await;
+    // Timer::after(Duration::from_secs(1)).await;
     work_sender.send(WorkMsg::Work(2)).await;
-    Timer::after(Duration::from_secs(1)).await;
+    // Timer::after(Duration::from_secs(1)).await;
     work_sender.send(WorkMsg::Work(3)).await;
-    Timer::after(Duration::from_secs(1)).await;
+    // Timer::after(Duration::from_secs(1)).await;
     work_sender.send(WorkMsg::Work(4)).await;
-    Timer::after(Duration::from_secs(1)).await;
+    // Timer::after(Duration::from_secs(1)).await;
     work_sender.send(WorkMsg::Work(5)).await;
-    Timer::after(Duration::from_secs(1)).await;
+    // Timer::after(Duration::from_secs(1)).await;
     work_sender.send(WorkMsg::Exit).await;
 }
 
@@ -179,6 +180,11 @@ async fn dispatch(work_receiver: Receiver<WorkMsg>, result_sender: Sender<Result
     let (pool_stop_sender, pool_stop_receiver) = unbounded();
     let (pool_result_sender, pool_result_receiver) = unbounded();
     smol::spawn(taskPool(pool_result_sender.clone(), pool_task_receiver.clone(), pool_finish_receiver.clone(), pool_stop_receiver.clone())).detach();
+
+    //共享内存
+    let cache = Arc::new(Mutex::new(HashMap::<u8,u8>::new()));
+
+
     loop {
         // 接收并处理消息，直到收到 exit 消息
         match work_receiver.recv().await {
@@ -186,7 +192,7 @@ async fn dispatch(work_receiver: Receiver<WorkMsg>, result_sender: Sender<Result
                 // 执行一些工作，并且发送消息给 Result 队列
                 println!("收到任务消息 start");
                 pool_task_sender.send(()).await;
-                smol::spawn(task(result_sender.clone(), num, pool_finish_sender.clone())).detach();
+                smol::spawn(task(result_sender.clone(), num, pool_finish_sender.clone(), cache.clone())).detach();
                 println!("收到任务消息 end");
             },
             Ok(WorkMsg::Exit) => {
@@ -203,13 +209,16 @@ async fn dispatch(work_receiver: Receiver<WorkMsg>, result_sender: Sender<Result
     println!("等待任务完成");
     let _ = pool_result_receiver.recv().await;
 
+    println!("{:?}", cache);
 
     result_sender.send(ResultMsg::Exited).await;
 }
 
 
-async fn task(result_sender: Sender<ResultMsg>, param: u8, pool_finish_sender: Sender<()>){
+async fn task(result_sender: Sender<ResultMsg>, param: u8, pool_finish_sender: Sender<()>, cache: Arc<Mutex<HashMap<u8,u8>>>){
     println!("开始工作 {}",param);
+    let mut map = cache.lock();
+    map.insert(param , param);
     result_sender.send(ResultMsg::Result(param)).await;
     pool_finish_sender.send(()).await;
 }
@@ -237,27 +246,6 @@ async fn taskPool(pool_result_sender: Sender<()>, pool_task_receiver: Receiver<(
                 }
             }
         }
-
-        // select!{
-        //     recv(pool_task_receiver) -> msg => {
-        //         println!("未完成任务 +1");
-        //         count = count + 1;
-        //     },
-        //     // recv(pool_finish_receiver) -> msg => {
-        //     //     println!("未完成任务 -1");
-        //     //     count = count - 1;
-        //     //     if stop && count == 0{
-        //     //         break;
-        //     //     }
-        //     // },
-        //     // recv(pool_stop_receiver) -> msg => {
-        //     //     stop = true;
-        //     //     if count == 0 {
-        //     //         break;
-        //     //     }
-        //     // }
-        //     default(Duration::from_secs(1)) => println!("timed out"),
-        // }
     }
 
 

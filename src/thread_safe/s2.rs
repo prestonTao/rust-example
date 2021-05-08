@@ -4,7 +4,8 @@
     所以run方法里面加了句等待一秒钟退出的方法，是保证所有异步方法全部执行完成。
 */
 
-use async_channel::{bounded, Receiver, Sender};
+// use async_channel::{bounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, bounded, select, unbounded};
 use async_io::Timer;
 use std::time::Duration;
 
@@ -33,19 +34,19 @@ async fn example(){
     // 生成子线程用于执行另一个并行组件
     smol::spawn(dispatch(work_receiver, result_sender)).detach();
     println!("111111111");
-    work_sender.send(WorkMsg::Work(1)).await;
-    work_sender.send(WorkMsg::Work(2)).await;
-    work_sender.send(WorkMsg::Work(3)).await;
-    work_sender.send(WorkMsg::Work(4)).await;
-    work_sender.send(WorkMsg::Work(5)).await;
-    work_sender.send(WorkMsg::Exit).await;
+    work_sender.send(WorkMsg::Work(1));
+    work_sender.send(WorkMsg::Work(2));
+    work_sender.send(WorkMsg::Work(3));
+    work_sender.send(WorkMsg::Work(4));
+    work_sender.send(WorkMsg::Work(5));
+    work_sender.send(WorkMsg::Exit);
     println!("222222222222");
 
     // worker执行计数
     let mut counter = 0;
 
     loop{
-        match result_receiver.recv().await {
+        match result_receiver.recv() {
             Ok(ResultMsg::Result(num)) => {
                 println!("接收到返回消息 start");
                 counter += 1;
@@ -65,7 +66,7 @@ async fn example(){
 async fn dispatch(receiver: Receiver<WorkMsg>, sender: Sender<ResultMsg>){
     loop {
         // 接收并处理消息，直到收到 exit 消息
-        match receiver.recv().await {
+        match receiver.recv() {
             Ok(WorkMsg::Work(num)) => {
                 // 执行一些工作，并且发送消息给 Result 队列
                 println!("收到任务消息 start");
@@ -75,7 +76,7 @@ async fn dispatch(receiver: Receiver<WorkMsg>, sender: Sender<ResultMsg>){
             Ok(WorkMsg::Exit) => {
                 // 发送 exit 确认消息
                 println!("收到Exit消息 start");
-                sender.send(ResultMsg::Exited).await;
+                sender.send(ResultMsg::Exited);
                 println!("收到Exit消息 end");
                 break;
             },
@@ -87,5 +88,5 @@ async fn dispatch(receiver: Receiver<WorkMsg>, sender: Sender<ResultMsg>){
 
 async fn task(sender: Sender<ResultMsg>, param: u8){
     println!("开始工作 {}",param);
-    sender.send(ResultMsg::Result(param)).await;
+    sender.send(ResultMsg::Result(param));
 }

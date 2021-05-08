@@ -7,6 +7,8 @@ pub mod time_example;
 pub mod libother;
 pub mod smart_pointer;
 pub mod thread_safe;
+pub mod memory_reordering;
+pub mod trait_usage;
 
 use tokio::net::TcpListener;
 use tokio::prelude::*;
@@ -26,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	// rust_example::net::run();
 	// rust_example::futures::run();
 	// rust_example::libother::tokio::example::run();
-	// rust_example::test::run();
+	// rust_example::test::run().await;
 	// libother::tokio::tokioasync2::run().await;
 	// libother::tokio::tokiotcpserver::run();
 	// rust_example::select::run().await;
@@ -37,7 +39,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	// libother::async_std::simple1::run();
 	// libother::pnet::simple::run();
-	thread_safe::s3::run().await;
+	// thread_safe::s4::run().await;
+	// memory_reordering::spinlock::run();
+	trait_usage::auth::run();
+
+
 
 	//这个方法有异步监听命令行输入，留在最后
 	// libother::tokio::tokioasync::run().await;

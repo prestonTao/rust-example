@@ -1,41 +1,46 @@
-#![feature(box_syntax)]
 
-extern crate rand;
-// use rand::Rng;
 use std::thread;
+use std::time::Duration;
+use blocking::unblock;
+// use crossbeam_channel::{select, unbounded, Sender, Receiver};
+use async_channel::{unbounded, Receiver, Sender};
+use rand::Rng;
+use async_io::Timer;
+extern crate rand;
 
+pub async fn run() {
+    example().await;
+}
 
-pub fn run(){
-    println!("start test----------");
-    example();
+async fn example(){
+	let (s1, r1) = unbounded();
+	smol::spawn(dispatch(s1)).detach();
+	r1.recv().await;
+	// Timer::after(Duration::from_secs(10));
 }
 
 
+async fn dispatch(sender: Sender<()>){
 
+	// Timer::after(Duration::from_secs(1));
+	let (s2, r2) = unbounded();
 
-/*
-	创建数组
-*/
-pub fn example(){
-	// let secret_number = rand::thread_rng().gen_range(1, 101);
- //    println!("这个秘密数字是：{}", secret_number);
-    
-	// let topOne = Top{
-	// 	name: "nihao".to_string(),
-	// };
-	// let mut temp = vec![topOne];
-	// let a: [Vec<Top>; 20] = [&mut temp; 20];
-	// let pool: [Vec<u8>;20] = [Vec::new();20];
+	let count = 10;
+	// for i in 0..count {
+		smol::spawn(task(s2.clone())).detach();
+	// }
 
-	// let pool: Vec<[u8;1024*1024]> = Vec::new();
+	// for i in 0..count {
+		r2.recv().await;
+	// }
 
-	let block = Box::new([0u8; 1024*1024]);
-
-	thread::sleep_ms(1000*5);
-
-
-    
+	
+	sender.send(()).await;
 }
-// struct Top{
-// 	name: String,
-// }
+
+async fn task(sender: Sender<()>){
+	let secret_number = rand::thread_rng().gen_range(1, 10);
+	println!("任务等待 {} 秒", secret_number);
+	Timer::after(Duration::from_secs(secret_number));
+	sender.send(()).await;
+}
