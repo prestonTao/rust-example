@@ -6,19 +6,21 @@ pub fn run(){
     // let defaultAuth = AuthDefault::new();
     // let e = Engine{name: "".to_string(), auth: defaultAuth};
     // let e = Engine{name: "".to_string(), auth: defaultAuth};
-    let eg = Engine::new("".to_string());
+    let mut eg: Engine<&dyn Fn(String) -> Result<String, EngineError>> = Engine::new("".to_string());
+    eg.addRouter(1, &SendKey);
+    eg.processRouter(1);
     // eg.authPro();
 
     
 }
 
 // trait Fn(String) -> Result<String, EngineError>;
-type Future: Fn(String) -> Result<String, EngineError>;
+// type Future: Fn(String) -> Result<String, EngineError>;
 
-struct Engine <F>
+struct Engine<F>
 {
     name: String,
-    router: HashMap<u16, Arc<F>>,//  Arc<F>,
+    router: HashMap<u16, Box<F>>,//  Arc<F>,
     // auth: AuthTool<S>,
 }
 
@@ -31,7 +33,7 @@ where F: Fn(String) -> Result<String, EngineError>,
         // let defaultAuth = AuthDefault::new();
         // let authTool = AuthTool(defaultAuth);
         // let tool = AuthTool::from(defaultAuth);
-        let m = HashMap::<u16, Arc<F>>::new();
+        let m = HashMap::<u16, Box<F>>::new();
         // let am = Arc::new(m);
         Engine{
             name: name,
@@ -39,8 +41,20 @@ where F: Fn(String) -> Result<String, EngineError>,
         }
     }
     fn addRouter(&mut self, msgid: u16, process_fn: F){
-        // self.router.insert(msgid, F);
+        self.router.insert(msgid, Box::new(process_fn));
     }
+
+    fn processRouter(self, msgid: u16){
+        let value = self.router.get(&msgid);
+        let func = value.as_ref();
+        match func{
+            Some(f) => {
+                f("nihao".to_string());
+            }
+            None => {}
+        }
+    }
+
     // fn authPro(self){
     //     // self.auth.RecvKey("hello".to_string());
     //     let pf = self.auth.as_ref();

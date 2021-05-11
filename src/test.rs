@@ -1,46 +1,97 @@
+use std::sync::Arc;
 
-use std::thread;
-use std::time::Duration;
-use blocking::unblock;
-// use crossbeam_channel::{select, unbounded, Sender, Receiver};
-use async_channel::{unbounded, Receiver, Sender};
-use rand::Rng;
-use async_io::Timer;
-extern crate rand;
+/*
+    这种方式支持直接在struct中带加trait约束，缺点是不能使用new方法给带trait属性赋值。
+    只能通过其它方式创建实例。
+*/
 
-pub async fn run() {
-    example().await;
+
+pub fn run(){
+    println!("开始运行trait示例...");
+    // let defaultAuth = AuthDefault::new();
+    // let e = Engine{name: "".to_string(), auth: defaultAuth};
+    // let e = Engine{name: "".to_string(), auth: ()};
+    // let e: Engine<&dyn Auth> = Engine::new("".to_string());
+    // e.authPro();
+
+    
 }
 
-async fn example(){
-	let (s1, r1) = unbounded();
-	smol::spawn(dispatch(s1)).detach();
-	r1.recv().await;
-	// Timer::after(Duration::from_secs(10));
+struct Engine <S>
+where S: Auth,
+{
+    name: String,
+    auth: Option<Box<S>>,// Arc<Box<S>>,
+    // auth: AuthTool<S>,
 }
 
 
-async fn dispatch(sender: Sender<()>){
+impl <S: Auth> Engine<S>{
+    fn new(name: String) -> Self{
+        // let defaultAuth = AuthDefault::new();
+        // let bauth = Box::new(defaultAuth);
+        // // let authTool = AuthTool(defaultAuth);
+        // // let tool = AuthTool::from(defaultAuth);
+        // let abauth = Arc::new(bauth);
+        Engine{
+            name: name,
+            auth: Option::None,
+        }
+    }
+    fn setAuth(&mut self, auth: S){
+        // self.auth = Option::Some(auth);
+    }
+    fn authPro(self){
+        match self.auth {
+            Some(auth) => {
+                auth.RecvKey("".to_string());
+            }
+            None => {
+                let defaultAuth = AuthDefault::new();
+                defaultAuth.RecvKey("".to_string());
+            }
+        }
 
-	// Timer::after(Duration::from_secs(1));
-	let (s2, r2) = unbounded();
-
-	let count = 10;
-	// for i in 0..count {
-		smol::spawn(task(s2.clone())).detach();
-	// }
-
-	// for i in 0..count {
-		r2.recv().await;
-	// }
-
-	
-	sender.send(()).await;
+        // self.auth.RecvKey("hello".to_string());
+    }
 }
 
-async fn task(sender: Sender<()>){
-	let secret_number = rand::thread_rng().gen_range(1, 10);
-	println!("任务等待 {} 秒", secret_number);
-	Timer::after(Duration::from_secs(secret_number));
-	sender.send(()).await;
+
+
+
+pub trait Auth: Clone{
+    fn SendKey(self, name: String) -> Result<String, EngineError>;
+	fn RecvKey(self, name: String) -> Result<String, EngineError>;
 }
+
+pub enum EngineError{
+    AuthDefault //验证默认错误
+}
+
+
+pub struct AuthDefault{
+}
+
+impl AuthDefault{
+    pub fn new() -> AuthDefault {
+        AuthDefault{}
+    }
+}
+
+impl Auth for AuthDefault {
+    fn SendKey(self, name: String) -> Result<String, EngineError>{
+        println!("SendKeyDefault");
+        Ok("".to_string())
+    }
+
+    fn RecvKey(self, name: String) -> Result<String, EngineError> {
+        println!("RecvKeyDefault");
+        Ok("".to_string())
+    }
+}
+impl Clone for AuthDefault {
+    fn clone(&self) -> Self {
+        Self {}
+    }
+}
+

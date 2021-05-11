@@ -43,7 +43,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	// memory_reordering::spinlock::run();
 	// trait_usage::auth::run();
 	// trait_usage::auth_fn::run(); 
-	trait_usage::router::run(); 
+	// trait_usage::router::run(); 
+	trait_usage::template_method::run().await;
 	
 
 

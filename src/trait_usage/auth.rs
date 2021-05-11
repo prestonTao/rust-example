@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 /*
     这种方式支持直接在struct中带加trait约束，缺点是不能使用new方法给带trait属性赋值。
     只能通过其它方式创建实例。
@@ -7,64 +9,54 @@
 pub fn run(){
     println!("开始运行trait示例...");
     let defaultAuth = AuthDefault::new();
-    // let e = Engine{name: "".to_string(), auth: defaultAuth};
     let e = Engine{name: "".to_string(), auth: defaultAuth};
+    // let e = Engine{name: "".to_string(), auth: ()};
+    // let e: Engine<&dyn Auth> = Engine::new("".to_string());
     e.authPro();
 
     
 }
 
-struct Engine <S: Auth>{
+struct Engine <S>
+{
     name: String,
     auth: S,
+    // auth: Option<Box<S>>,// Arc<Box<S>>,
     // auth: AuthTool<S>,
 }
 
 
 impl <S: Auth> Engine<S>{
-    // fn new() -> Self{
-    //     let defaultAuth = AuthDefault::new();
-    //     let authTool = AuthTool(defaultAuth);
-    //     let tool = AuthTool::from(defaultAuth);
+    // fn new(name: String) -> Self{
+    //     // let defaultAuth = AuthDefault::new();
+    //     // let bauth = Box::new(defaultAuth);
+    //     // // let authTool = AuthTool(defaultAuth);
+    //     // // let tool = AuthTool::from(defaultAuth);
+    //     // let abauth = Arc::new(bauth);
     //     Engine{
-    //         name: "".to_string(),
-    //         auth: tool,
+    //         name: name,
+    //         auth: Option::None,
     //     }
     // }
+    // fn setAuth(&mut self, auth: S){
+    //     self.auth = Option::Some(auth);
+    // }
     fn authPro(self){
+        // match self.auth {
+        //     Some(auth) => {
+        //         auth.RecvKey("".to_string());
+        //     }
+        //     None => {
+        //         let defaultAuth = AuthDefault::new();
+        //         defaultAuth.RecvKey("".to_string());
+        //     }
+        // }
+
         self.auth.RecvKey("hello".to_string());
     }
 }
 
-struct AuthTool<S: Auth>(S);
 
-
-impl<S> From<S> for AuthTool<S>
-where
-    S: Auth,
-{
-    fn from(scheme: S) -> AuthTool<S> {
-        AuthTool(scheme)
-    }
-}
-
-impl<S> AsRef<S> for AuthTool<S>
-where
-    S: Auth,
-{
-    fn as_ref(&self) -> &S {
-        &self.0
-    }
-}
-
-impl<S> AsMut<S> for AuthTool<S>
-where
-    S: Auth,
-{
-    fn as_mut(&mut self) -> &mut S {
-        &mut self.0
-    }
-}
 
 
 pub trait Auth: Clone{
