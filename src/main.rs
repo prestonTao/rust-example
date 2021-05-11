@@ -8,6 +8,7 @@ pub mod libother;
 pub mod smart_pointer;
 pub mod thread_safe;
 pub mod memory_reordering;
+pub mod trait_usage;
 
 use tokio::net::TcpListener;
 use tokio::prelude::*;
@@ -38,8 +39,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	// libother::async_std::simple1::run();
 	// libother::pnet::simple::run();
-	thread_safe::s4::run().await;
+	// thread_safe::s4::run().await;
 	// memory_reordering::spinlock::run();
+	// trait_usage::auth::run();
+	// trait_usage::auth_fn::run(); 
+	trait_usage::router::run(); 
+	
+
 
 
 	//这个方法有异步监听命令行输入，留在最后
