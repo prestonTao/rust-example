@@ -23,10 +23,11 @@ impl <F> Engine<F>
 where F: Fn(String) -> Result<String, EngineError>,
 {
     fn new(name: String, process_fn: F) -> Self{
-        let pf = Arc::new(process_fn);
+        let pf = Arc::new(SendKey);
         // let defaultAuth = AuthDefault::new();
         // let authTool = AuthTool(defaultAuth);
         // let tool = AuthTool::from(defaultAuth);
+
         Engine{
             name: name,
             auth: pf,
