@@ -32,6 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	// libother::tokio::tokioasync2::run().await;
 	// libother::tokio::tokiotcpserver::run();
 	// rust_example::select::run().await;
+	rust_example::select_two::run().await;
 	// rust_example::time_example::run();
 
 
